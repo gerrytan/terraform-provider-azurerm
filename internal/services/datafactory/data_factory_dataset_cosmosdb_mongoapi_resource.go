@@ -21,15 +21,15 @@ var _ sdk.Resource = DataFactoryDatasetCosmosDbMongoDbResource{}
 type DataFactoryDatasetCosmosDbMongoDbResource struct{}
 
 type DataFactoryDatasetCosmosDbMongoDbResourceModel struct {
-	AdditionalProperties map[string]string      `tfschema:"additional_properties"`
-	Annotations          []string               `tfschema:"annotations"`
-	CollectionName       string                 `tfschema:"collection_name"`
-	DataFactoryId        string                 `tfschema:"data_factory_id"`
-	Description          string                 `tfschema:"description"`
-	Folder               string                 `tfschema:"folder"`
-	LinkedServiceName    string                 `tfschema:"linked_service_name"`
-	Name                 string                 `tfschema:"name"`
-	Parameters           map[string]interface{} `tfschema:"parameters"`
+	AdditionalProperties map[string]string `tfschema:"additional_properties"`
+	Annotations          []string          `tfschema:"annotations"`
+	CollectionName       string            `tfschema:"collection_name"`
+	DataFactoryId        string            `tfschema:"data_factory_id"`
+	Description          string            `tfschema:"description"`
+	Folder               string            `tfschema:"folder"`
+	LinkedServiceName    string            `tfschema:"linked_service_name"`
+	Name                 string            `tfschema:"name"`
+	Parameters           map[string]string `tfschema:"parameters"`
 }
 
 func (DataFactoryDatasetCosmosDbMongoDbResource) Arguments() map[string]*pluginsdk.Schema {
@@ -159,7 +159,7 @@ func (r DataFactoryDatasetCosmosDbMongoDbResource) Create() sdk.ResourceFunc {
 			}
 
 			if config.Parameters != nil {
-				datasetProperties.Parameters = expandDataSetParameters(config.Parameters)
+				datasetProperties.Parameters = expandDataSetParametersString(&config.Parameters)
 			}
 
 			dataset := datafactory.DatasetResource{
@@ -234,7 +234,7 @@ func (r DataFactoryDatasetCosmosDbMongoDbResource) Update() sdk.ResourceFunc {
 			}
 
 			if metadata.ResourceData.HasChange("parameters") {
-				datasetProperties.Parameters = expandDataSetParameters(config.Parameters)
+				datasetProperties.Parameters = expandDataSetParametersString(&config.Parameters)
 			}
 
 			dataset.Properties = datasetProperties
@@ -306,7 +306,7 @@ func (DataFactoryDatasetCosmosDbMongoDbResource) Read() sdk.ResourceFunc {
 
 			state.Name = id.Name
 
-			state.Parameters = flattenDataSetParameters(datasetProperties.Parameters)
+			state.Parameters = flattenDataSetParametersString(&datasetProperties.Parameters)
 
 			return metadata.Encode(&state)
 		},
