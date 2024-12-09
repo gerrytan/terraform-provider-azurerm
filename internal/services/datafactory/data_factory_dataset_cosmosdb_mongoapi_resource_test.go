@@ -161,17 +161,17 @@ func (DatasetCosmosDbMongoDbResource) complete(data acceptance.TestData) string 
 
 resource "azurerm_data_factory_dataset_cosmosdb_mongoapi" "test" {
   additional_properties = {
-	"additionalProp1" = "value1"
+    "additionalProp1" = "value1"
   }
-  annotations = [ "annotation1" ]
-  collection_name = "collection-1"
-  data_factory_id = azurerm_data_factory.test.id
-  description = "some-description"
-  folder = "folder-1"
+  annotations         = ["annotation1"]
+  collection_name     = "collection-1"
+  data_factory_id     = azurerm_data_factory.test.id
+  description         = "some-description"
+  folder              = "folder-1"
   linked_service_name = azurerm_data_factory_linked_service_cosmosdb_mongoapi.test.name
-  name = "name-1"
+  name                = "name-1"
   parameters = {
-	"param1" = "value1"
+    "param1" = "value1"
   }
 }
   `, commonConfig(data))
