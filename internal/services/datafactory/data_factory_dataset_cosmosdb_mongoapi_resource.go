@@ -21,7 +21,7 @@ var _ sdk.Resource = DataFactoryDatasetCosmosDbMongoDbResource{}
 type DataFactoryDatasetCosmosDbMongoDbResource struct{}
 
 type DataFactoryDatasetCosmosDbMongoDbResourceModel struct {
-	AdditionalProperties map[string]interface{} `tfschema:"additional_properties"`
+	AdditionalProperties map[string]string      `tfschema:"additional_properties"`
 	Annotations          []string               `tfschema:"annotations"`
 	CollectionName       string                 `tfschema:"collection_name"`
 	DataFactoryId        string                 `tfschema:"data_factory_id"`
@@ -141,7 +141,7 @@ func (r DataFactoryDatasetCosmosDbMongoDbResource) Create() sdk.ResourceFunc {
 			}
 
 			if config.AdditionalProperties != nil {
-				datasetProperties.AdditionalProperties = config.AdditionalProperties
+				datasetProperties.AdditionalProperties = expandAdditionalProperties(&config.AdditionalProperties)
 			}
 
 			if config.Annotations != nil {
@@ -205,7 +205,7 @@ func (r DataFactoryDatasetCosmosDbMongoDbResource) Update() sdk.ResourceFunc {
 			}
 
 			if metadata.ResourceData.HasChange("additional_properties") {
-				datasetProperties.AdditionalProperties = config.AdditionalProperties
+				datasetProperties.AdditionalProperties = expandAdditionalProperties(&config.AdditionalProperties)
 			}
 
 			if metadata.ResourceData.HasChange("annotations") {
@@ -276,7 +276,7 @@ func (DataFactoryDatasetCosmosDbMongoDbResource) Read() sdk.ResourceFunc {
 
 			state := DataFactoryDatasetCosmosDbMongoDbResourceModel{}
 
-			state.AdditionalProperties = datasetProperties.AdditionalProperties
+			state.AdditionalProperties = flattenAdditionalProperties(&datasetProperties.AdditionalProperties)
 
 			if datasetProperties.Annotations != nil {
 				state.Annotations = flattenDataFactoryAnnotations(datasetProperties.Annotations)
