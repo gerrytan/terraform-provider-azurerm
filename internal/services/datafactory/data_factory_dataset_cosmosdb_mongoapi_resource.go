@@ -145,7 +145,7 @@ func (r DataFactoryDatasetCosmosDbMongoDbResource) Create() sdk.ResourceFunc {
 			}
 
 			if config.Annotations != nil {
-				datasetProperties.Annotations = expandDataFactoryAnnotations(&config.Annotations)
+				datasetProperties.Annotations = pointer.To(utils.FlattenStringSlice(&config.Annotations))
 			}
 
 			if config.Description != "" {
@@ -209,7 +209,7 @@ func (r DataFactoryDatasetCosmosDbMongoDbResource) Update() sdk.ResourceFunc {
 			}
 
 			if metadata.ResourceData.HasChange("annotations") {
-				datasetProperties.Annotations = expandDataFactoryAnnotations(&config.Annotations)
+				datasetProperties.Annotations = pointer.To(utils.FlattenStringSlice(&config.Annotations))
 			}
 
 			if metadata.ResourceData.HasChange("collection_name") {
