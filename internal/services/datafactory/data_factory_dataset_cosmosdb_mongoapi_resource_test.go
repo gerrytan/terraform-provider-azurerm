@@ -77,6 +77,15 @@ func TestAccDataFactoryDatasetCosmosDbMongoDb_update(t *testing.T) {
 			},
 		},
 		data.ImportStep(),
+		{
+			Config: r.basic(data),
+			ConfigPlanChecks: resource.ConfigPlanChecks{
+				PreApply: []plancheck.PlanCheck{
+					plancheck.ExpectResourceAction("azurerm_data_factory_dataset_cosmosdb_mongoapi.test", plancheck.ResourceActionUpdate),
+				},
+			},
+		},
+		data.ImportStep(),
 	})
 }
 
