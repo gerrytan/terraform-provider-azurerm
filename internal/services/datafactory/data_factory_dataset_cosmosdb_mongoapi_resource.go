@@ -34,6 +34,23 @@ type DataFactoryDatasetCosmosDbMongoDbResourceModel struct {
 
 func (DataFactoryDatasetCosmosDbMongoDbResource) Arguments() map[string]*pluginsdk.Schema {
 	return map[string]*pluginsdk.Schema{
+		"name": {
+			Type:         pluginsdk.TypeString,
+			Required:     true,
+			ForceNew:     true,
+			ValidateFunc: validate.LinkedServiceDatasetName,
+		},
+		"data_factory_id": {
+			Type:         pluginsdk.TypeString,
+			Required:     true,
+			ForceNew:     true,
+			ValidateFunc: factories.ValidateFactoryID,
+		},
+		"linked_service_name": {
+			Type:         pluginsdk.TypeString,
+			Required:     true,
+			ValidateFunc: validation.StringIsNotEmpty,
+		},
 		"additional_properties": {
 			Type:     pluginsdk.TypeMap,
 			Optional: true,
@@ -53,12 +70,6 @@ func (DataFactoryDatasetCosmosDbMongoDbResource) Arguments() map[string]*plugins
 			Required:     true,
 			ValidateFunc: validation.StringIsNotEmpty,
 		},
-		"data_factory_id": {
-			Type:         pluginsdk.TypeString,
-			Required:     true,
-			ForceNew:     true,
-			ValidateFunc: factories.ValidateFactoryID,
-		},
 		"description": {
 			Type:         pluginsdk.TypeString,
 			Optional:     true,
@@ -68,17 +79,6 @@ func (DataFactoryDatasetCosmosDbMongoDbResource) Arguments() map[string]*plugins
 			Type:         pluginsdk.TypeString,
 			Optional:     true,
 			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"linked_service_name": {
-			Type:         pluginsdk.TypeString,
-			Required:     true,
-			ValidateFunc: validation.StringIsNotEmpty,
-		},
-		"name": {
-			Type:         pluginsdk.TypeString,
-			Required:     true,
-			ForceNew:     true,
-			ValidateFunc: validate.LinkedServiceDatasetName,
 		},
 		"parameters": {
 			Type:     pluginsdk.TypeMap,
