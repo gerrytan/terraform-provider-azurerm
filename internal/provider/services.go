@@ -64,6 +64,7 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/healthcare"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/hsm"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/hybridcompute"
+	"github.com/hashicorp/terraform-provider-azurerm/internal/services/impact"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/iotcentral"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/iothub"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/keyvault"
@@ -178,6 +179,7 @@ func SupportedTypedServices() []sdk.TypedServiceRegistration {
 		fluidrelay.Registration{},
 		graphservices.Registration{},
 		hybridcompute.Registration{},
+		impact.Registration{},
 		iotcentral.Registration{},
 		iothub.Registration{},
 		keyvault.Registration{},

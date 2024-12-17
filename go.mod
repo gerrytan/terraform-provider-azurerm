@@ -18,7 +18,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/go-azure-helpers v0.71.0
 	github.com/hashicorp/go-azure-sdk/resource-manager v0.20241206.1180327
-	github.com/hashicorp/go-azure-sdk/sdk v0.20241206.1180327
+	github.com/hashicorp/go-azure-sdk/sdk v0.20250115.1141151
 	github.com/hashicorp/go-hclog v1.6.3
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/hashicorp/go-uuid v1.0.3
@@ -94,6 +94,8 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	software.sslmate.com/src/go-pkcs12 v0.4.0 // indirect
 )
+
+replace github.com/hashicorp/go-azure-sdk/resource-manager => /home/gtan/projects/go-azure-sdk/resource-manager
 
 go 1.22.0
 

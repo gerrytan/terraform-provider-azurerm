@@ -148,7 +148,7 @@ github.com/hashicorp/go-azure-helpers/resourcemanager/tags
 github.com/hashicorp/go-azure-helpers/resourcemanager/zones
 github.com/hashicorp/go-azure-helpers/sender
 github.com/hashicorp/go-azure-helpers/storage
-# github.com/hashicorp/go-azure-sdk/resource-manager v0.20241206.1180327
+# github.com/hashicorp/go-azure-sdk/resource-manager v0.20241206.1180327 => /home/gtan/projects/go-azure-sdk/resource-manager
 ## explicit; go 1.22
 github.com/hashicorp/go-azure-sdk/resource-manager/aad/2021-05-01/domainservices
 github.com/hashicorp/go-azure-sdk/resource-manager/aadb2c/2021-04-01-preview
@@ -591,6 +591,7 @@ github.com/hashicorp/go-azure-sdk/resource-manager/hybridcompute/2024-07-10/priv
 github.com/hashicorp/go-azure-sdk/resource-manager/hybridcompute/2024-07-10/privatelinkscopes
 github.com/hashicorp/go-azure-sdk/resource-manager/hybridkubernetes/2021-10-01/connectedclusters
 github.com/hashicorp/go-azure-sdk/resource-manager/hybridkubernetes/2024-01-01/connectedclusters
+github.com/hashicorp/go-azure-sdk/resource-manager/impact/2024-05-01-preview/connectors
 github.com/hashicorp/go-azure-sdk/resource-manager/insights/2015-04-01/activitylogs
 github.com/hashicorp/go-azure-sdk/resource-manager/insights/2018-03-01/metricalerts
 github.com/hashicorp/go-azure-sdk/resource-manager/insights/2018-04-16/scheduledqueryrules
@@ -1164,7 +1165,7 @@ github.com/hashicorp/go-azure-sdk/resource-manager/workloads/2023-04-01/saplands
 github.com/hashicorp/go-azure-sdk/resource-manager/workloads/2023-04-01/saprecommendations
 github.com/hashicorp/go-azure-sdk/resource-manager/workloads/2023-04-01/sapsupportedsku
 github.com/hashicorp/go-azure-sdk/resource-manager/workloads/2023-04-01/sapvirtualinstances
-# github.com/hashicorp/go-azure-sdk/sdk v0.20241206.1180327
+# github.com/hashicorp/go-azure-sdk/sdk v0.20241209.1115630
 ## explicit; go 1.22
 github.com/hashicorp/go-azure-sdk/sdk/auth
 github.com/hashicorp/go-azure-sdk/sdk/auth/autorest
@@ -1677,3 +1678,4 @@ gopkg.in/yaml.v3
 ## explicit; go 1.19
 software.sslmate.com/src/go-pkcs12
 software.sslmate.com/src/go-pkcs12/internal/rc2
+# github.com/hashicorp/go-azure-sdk/resource-manager => /home/gtan/projects/go-azure-sdk/resource-manager
