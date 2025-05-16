@@ -4,13 +4,17 @@
 package datafactory
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"net/url"
 	"time"
 
+	"github.com/hashicorp/go-azure-helpers/lang/pointer"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonids"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/factories"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/tf"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/datafactory/parse"
@@ -56,7 +60,30 @@ func resourceDataFactoryLinkedServiceKeyVault() *pluginsdk.Resource {
 				ValidateFunc: factories.ValidateFactoryID,
 			},
 
-			"key_vault_id": commonschema.ResourceIDReferenceRequired(&commonids.KeyVaultId{}),
+			"key_vault_id": commonschema.ResourceIDReferenceOptional(&commonids.KeyVaultId{}),
+
+			"key_vault_base_url": {
+				Type:     pluginsdk.TypeString,
+				Optional: true,
+				ValidateFunc: func(val interface{}, key string) ([]string, []error) {
+					var warnings []string
+					var errors []error
+
+					w, e := validation.StringIsNotEmpty(val, key)
+					warnings = append(warnings, w...)
+					errors = append(errors, e...)
+
+					if _, e := commonids.ParseKeyVaultID(val.(string)); e == nil {
+						errors = append(errors, fmt.Errorf("`%s` must not be a Key Vault ID, use `key_vault_id` attribute instead", key))
+					}
+
+					if _, e := url.ParseRequestURI(val.(string)); e == nil {
+						errors = append(errors, fmt.Errorf("`%s` must be a URL with dynamic expression, use `key_vault_id` attribute instead", key))
+					}
+
+					return warnings, errors
+				},
+			},
 
 			"description": {
 				Type:         pluginsdk.TypeString,
@@ -94,6 +121,23 @@ func resourceDataFactoryLinkedServiceKeyVault() *pluginsdk.Resource {
 				},
 			},
 		},
+
+		CustomizeDiff: func(ctx context.Context, d *pluginsdk.ResourceDiff, i interface{}) error {
+			keyVaultId, keyVaultIdExists := d.GetOk("key_vault_id")
+			keyVaultBaseUrl, keyVaultBaseUrlExists := d.GetOk("key_vault_base_url")
+
+			tflog.Debug(ctx, fmt.Sprintf("keyVaultIdExists: %t, keyVaultBaseUrlExists: %t", keyVaultIdExists, keyVaultBaseUrlExists))
+
+			if keyVaultIdExists && keyVaultBaseUrlExists {
+				return fmt.Errorf("Only one of `key_vault_id` or `key_vault_base_url` can be set")
+			}
+
+			if !keyVaultIdExists && !keyVaultBaseUrlExists {
+				return fmt.Errorf("Either `key_vault_id` or `key_vault_base_url` is required")
+			}
+
+			return nil
+		},
 	}
 }
 
@@ -111,14 +155,19 @@ func resourceDataFactoryLinkedServiceKeyVaultCreateUpdate(d *pluginsdk.ResourceD
 
 	id := parse.NewLinkedServiceID(subscriptionId, dataFactoryId.ResourceGroupName, dataFactoryId.FactoryName, d.Get("name").(string))
 
-	keyVaultId, err := commonids.ParseKeyVaultID(d.Get("key_vault_id").(string))
-	if err != nil {
-		return err
-	}
+	keyVaultIdRaw := d.Get("key_vault_id").(string)
+	keyVaultBaseUri := pointer.To(d.Get("key_vault_base_url").(string))
 
-	keyVaultBaseUri, err := keyVaultsClient.BaseUriForKeyVault(ctx, *keyVaultId)
-	if err != nil {
-		return err
+	if keyVaultIdRaw != "" {
+		keyVaultId, err := commonids.ParseKeyVaultID(keyVaultIdRaw)
+		if err != nil {
+			return fmt.Errorf("parsing Key Vault ID %q: %+v", keyVaultIdRaw, err)
+		}
+
+		keyVaultBaseUri, err = keyVaultsClient.BaseUriForKeyVault(ctx, *keyVaultId)
+		if err != nil {
+			return fmt.Errorf("retrieving Key Vault Base URI for %s: %+v", *keyVaultId, err)
+		}
 	}
 
 	if d.IsNewResource() {
@@ -238,13 +287,18 @@ func resourceDataFactoryLinkedServiceKeyVaultRead(d *pluginsdk.ResourceData, met
 
 	var keyVaultId *string
 	if baseUrl != "" {
-		subscriptionId := commonids.NewSubscriptionID(id.SubscriptionId)
-		keyVaultId, err = keyVaultsClient.KeyVaultIDFromBaseUrl(ctx, subscriptionId, baseUrl)
+		_, err := url.ParseRequestURI(baseUrl)
 		if err != nil {
-			return err
+			d.Set("key_vault_base_url", baseUrl)
+		} else {
+			subscriptionId := commonids.NewSubscriptionID(id.SubscriptionId)
+			keyVaultId, err = keyVaultsClient.KeyVaultIDFromBaseUrl(ctx, subscriptionId, baseUrl)
+			if err != nil {
+				return err
+			}
+			d.Set("key_vault_id", keyVaultId)
 		}
 	}
-	d.Set("key_vault_id", keyVaultId)
 
 	return nil
 }
