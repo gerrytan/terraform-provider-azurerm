@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/go-azure-helpers/lang/response"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/factories"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/linkedservices"
 	"github.com/hashicorp/terraform-provider-azurerm/helpers/tf"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/datafactory/parse"
@@ -16,7 +18,6 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/validation"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/timeouts"
 	"github.com/hashicorp/terraform-provider-azurerm/utils"
-	"github.com/jackofallops/kermit/sdk/datafactory/2018-06-01/datafactory" // nolint: staticcheck
 )
 
 func resourceDataFactoryLinkedServiceAzureTableStorage() *pluginsdk.Resource {
@@ -29,7 +30,7 @@ func resourceDataFactoryLinkedServiceAzureTableStorage() *pluginsdk.Resource {
 		Importer: pluginsdk.ImporterValidatingResourceIdThen(func(id string) error {
 			_, err := parse.LinkedServiceID(id)
 			return err
-		}, importDataFactoryLinkedService(datafactory.TypeBasicLinkedServiceTypeAzureTableStorage)),
+		}, importDataFactoryLinkedService(linkedservices.TypeBasicLinkedServiceTypeAzureTableStorage)),
 
 		Timeouts: &pluginsdk.ResourceTimeout{
 			Create: pluginsdk.DefaultTimeout(30 * time.Minute),
@@ -100,8 +101,8 @@ func resourceDataFactoryLinkedServiceAzureTableStorage() *pluginsdk.Resource {
 }
 
 func resourceDataFactoryLinkedServiceTableStorageCreateUpdate(d *pluginsdk.ResourceData, meta interface{}) error {
-	client := meta.(*clients.Client).DataFactory.LinkedServiceClient
-	subscriptionId := meta.(*clients.Client).DataFactory.LinkedServiceClient.SubscriptionID
+	client := meta.(*clients.Client).DataFactory.LinkedServicesClientGoAzureSDK
+	subscriptionId := meta.(*clients.Client).Account.SubscriptionId
 	ctx, cancel := timeouts.ForCreateUpdate(meta.(*clients.Client).StopContext, d)
 	defer cancel()
 
@@ -110,30 +111,30 @@ func resourceDataFactoryLinkedServiceTableStorageCreateUpdate(d *pluginsdk.Resou
 		return err
 	}
 
-	id := parse.NewLinkedServiceID(subscriptionId, dataFactoryId.ResourceGroupName, dataFactoryId.FactoryName, d.Get("name").(string))
+	id := linkedservices.NewLinkedServiceID(subscriptionId, dataFactoryId.ResourceGroupName, dataFactoryId.FactoryName, d.Get("name").(string))
 
 	if d.IsNewResource() {
-		existing, err := client.Get(ctx, id.ResourceGroup, id.FactoryName, id.Name, "")
+		existing, err := client.Get(ctx, id, linkedservices.DefaultGetOperationOptions())
 		if err != nil {
-			if !utils.ResponseWasNotFound(existing.Response) {
+			if !response.WasNotFound(existing.HttpResponse) {
 				return fmt.Errorf("checking for presence of existing Data Factory Table Storage Anonymous %s: %+v", id, err)
 			}
 		}
 
-		if !utils.ResponseWasNotFound(existing.Response) {
+		if !response.WasNotFound(existing.HttpResponse) {
 			return tf.ImportAsExistsError("azurerm_data_factory_linked_service_azure_table_storage", id.ID())
 		}
 	}
 
-	tableStorageLinkedService := &datafactory.AzureTableStorageLinkedService{
+	tableStorageLinkedService := &linkedservice.AzureTableStorageLinkedService{
 		Description: utils.String(d.Get("description").(string)),
-		AzureStorageLinkedServiceTypeProperties: &datafactory.AzureStorageLinkedServiceTypeProperties{
-			ConnectionString: &datafactory.SecureString{
+		AzureStorageLinkedServiceTypeProperties: &linkedservice.AzureStorageLinkedServiceTypeProperties{
+			ConnectionString: &linkedservice.SecureString{
 				Value: utils.String(d.Get("connection_string").(string)),
-				Type:  datafactory.TypeSecureString,
+				Type:  linkedservice.TypeSecureString,
 			},
 		},
-		Type: datafactory.TypeBasicLinkedServiceTypeAzureTableStorage,
+		Type: linkedservice.TypeBasicLinkedServiceTypeAzureTableStorage,
 	}
 
 	if v, ok := d.GetOk("parameters"); ok {
@@ -153,11 +154,11 @@ func resourceDataFactoryLinkedServiceTableStorageCreateUpdate(d *pluginsdk.Resou
 		tableStorageLinkedService.Annotations = &annotations
 	}
 
-	linkedService := datafactory.LinkedServiceResource{
+	linkedService := linkedservice.LinkedServiceResource{
 		Properties: tableStorageLinkedService,
 	}
 
-	if _, err := client.CreateOrUpdate(ctx, id.ResourceGroup, id.FactoryName, id.Name, linkedService, ""); err != nil {
+	if _, err := client.CreateOrUpdate(ctx, id, linkedService, linkedservices.DefaultCreateOrUpdateOperationOptions()); err != nil {
 		return fmt.Errorf("creating/updating Data Factory Table Storage %s: %+v", id, err)
 	}
 
@@ -193,7 +194,7 @@ func resourceDataFactoryLinkedServiceTableStorageRead(d *pluginsdk.ResourceData,
 
 	tableStorage, ok := resp.Properties.AsAzureTableStorageLinkedService()
 	if !ok {
-		return fmt.Errorf("classifying Data Factory Table Storage %s: Expected: %q Received: %q", *id, datafactory.TypeBasicLinkedServiceTypeAzureTableStorage, *resp.Type)
+		return fmt.Errorf("classifying Data Factory Table Storage %s: Expected: %q Received: %q", *id, linkedservice.TypeBasicLinkedServiceTypeAzureTableStorage, *resp.Type)
 	}
 
 	d.Set("additional_properties", tableStorage.AdditionalProperties)
