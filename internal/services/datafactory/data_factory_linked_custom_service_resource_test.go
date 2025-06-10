@@ -83,6 +83,11 @@ func TestAccDataFactoryLinkedCustomService_update(t *testing.T) {
 		},
 		data.ImportStep("type_properties_json"),
 		{
+			// Integration runtime has to be disconnected from linked service before deleting it, otherwise the deletion
+			// will fail with "still being referenced" error.
+			Config: r.completeWithoutLinkedServiceIntegrationRuntime(data),
+		},
+		{
 			Config: r.basic(data),
 			Check: acceptance.ComposeTestCheckFunc(
 				check.That(data.ResourceName).ExistsInAzure(r),
@@ -166,7 +171,18 @@ resource "azurerm_data_factory_linked_custom_service" "import" {
 `, r.basic(data))
 }
 
-func (r LinkedCustomServiceResource) complete(data acceptance.TestData) string {
+func (r LinkedCustomServiceResource) completeTemplate(data acceptance.TestData, withLinkedServiceIntegrationRuntime bool) string {
+	var linkedServiceIntegrationRuntime string
+	if withLinkedServiceIntegrationRuntime {
+		linkedServiceIntegrationRuntime = `
+  integration_runtime {
+    name = azurerm_data_factory_integration_runtime_azure_ssis.test.name
+    parameters = {
+      "Key" : "value"
+    }
+  }
+`
+	}
 	return fmt.Sprintf(`
 %s
 
@@ -188,12 +204,7 @@ resource "azurerm_data_factory_linked_custom_service" "test" {
 }
 JSON
 
-  integration_runtime {
-    name = azurerm_data_factory_integration_runtime_azure_ssis.test.name
-    parameters = {
-      "Key" : "value"
-    }
-  }
+%s
 
   additional_properties = {
     foo = "test1"
@@ -211,7 +222,15 @@ JSON
     "Env" : "Test"
   }
 }
-`, r.template(data), data.RandomInteger)
+`, r.template(data), data.RandomInteger, linkedServiceIntegrationRuntime)
+}
+
+func (r LinkedCustomServiceResource) complete(data acceptance.TestData) string {
+	return r.completeTemplate(data, true)
+}
+
+func (r LinkedCustomServiceResource) completeWithoutLinkedServiceIntegrationRuntime(data acceptance.TestData) string {
+	return r.completeTemplate(data, false)
 }
 
 func (r LinkedCustomServiceResource) web(data acceptance.TestData) string {

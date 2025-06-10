@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/dataflows"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/factories"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/integrationruntimes"
+	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/linkedservices"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/managedprivateendpoints"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/managedvirtualnetworks"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/datafactory/2018-06-01/pipelines"
@@ -22,14 +23,17 @@ type Client struct {
 	Credentials               *credentials.CredentialsClient
 	DataFlowClient            *dataflows.DataFlowsClient
 	IntegrationRuntimesClient *integrationruntimes.IntegrationRuntimesClient
+	LinkedServiceGoAzureSdk   *linkedservices.LinkedServicesClient
 	ManagedPrivateEndpoints   *managedprivateendpoints.ManagedPrivateEndpointsClient
 	ManagedVirtualNetworks    *managedvirtualnetworks.ManagedVirtualNetworksClient
 	PipelinesClient           *pipelines.PipelinesClient
 
 	// TODO: convert to using hashicorp/go-azure-sdk
-	DatasetClient       *datafactory.DatasetsClient
+	DatasetClient  *datafactory.DatasetsClient
+	TriggersClient *datafactory.TriggersClient
+
+	// Deprecated: use LinkedServiceGoAzureSdk instead, this kermit SDK has few missing property members
 	LinkedServiceClient *datafactory.LinkedServicesClient
-	TriggersClient      *datafactory.TriggersClient
 }
 
 func NewClient(o *common.ClientOptions) (*Client, error) {
