@@ -200,6 +200,25 @@ func TestAccMsSqlServer_azureadAdmin(t *testing.T) {
 	})
 }
 
+func TestAccMsSqlServer_detectDriftWhenAadAdminRemovedOutOfBand(t *testing.T) {
+	data := acceptance.BuildTestData(t, "azurerm_mssql_server", "test")
+	r := MsSqlServerResource{}
+
+	data.ResourceTest(t, r, []acceptance.TestStep{
+		{
+			Config: r.aadAdmin(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+			),
+		},
+		data.ImportStep("administrator_login_password"),
+		{
+			Config:    r.aadAdmin(data),
+			PreConfig: r.removeAadAdmin(),
+		},
+	})
+}
+
 func TestAccMsSqlServer_azureadAdminUpdate(t *testing.T) {
 	data := acceptance.BuildTestData(t, "azurerm_mssql_server", "test")
 	r := MsSqlServerResource{}
