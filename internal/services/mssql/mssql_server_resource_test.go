@@ -213,8 +213,8 @@ func TestAccMsSqlServer_detectDriftWhenAadAdminRemovedOutOfBand(t *testing.T) {
 		},
 		data.ImportStep("administrator_login_password"),
 		{
+			PreConfig: r.removeAadAdmin(data),
 			Config:    r.aadAdmin(data),
-			PreConfig: r.removeAadAdmin(),
 		},
 	})
 }
@@ -794,6 +794,12 @@ resource "azurerm_mssql_server" "test" {
   }
 }
 `, r.template(data), data.RandomInteger)
+}
+
+func (r MsSqlServerResource) removeAadAdmin(data acceptance.TestData) func() {
+	return func() {
+		fmt.Printf("Simulating out-of-band removal of Azure AD admin from the SQL Server...\n")
+	}
 }
 
 func (r MsSqlServerResource) aadAdminWithAADAuthOnly(data acceptance.TestData) string {
