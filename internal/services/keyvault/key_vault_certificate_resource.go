@@ -429,42 +429,12 @@ func resourceKeyVaultCertificate() *pluginsdk.Resource {
 			}
 
 			policiesRaw, ok := d.Get("certificate_policy").([]interface{})
-			if !ok || len(policiesRaw) == 0 || policiesRaw[0] == nil {
-				return nil
-			}
-
-			policy, ok := policiesRaw[0].(map[string]interface{})
 			if !ok {
 				return nil
 			}
 
-			issuerParametersRaw, ok := policy["issuer_parameters"].([]interface{})
-			if !ok || len(issuerParametersRaw) == 0 || issuerParametersRaw[0] == nil {
-				return nil
-			}
-
-			issuer, ok := issuerParametersRaw[0].(map[string]interface{})
-			if !ok {
-				return nil
-			}
-
-			issuerName, _ := issuer["name"].(string)
-
-			certificateType := ""
-			if v, exists := issuer["certificate_type"]; exists && v != nil {
-				if s, ok := v.(string); ok {
-					certificateType = strings.TrimSpace(s)
-				}
-			}
-
-			if certificateType != "" {
-				if !strings.EqualFold(issuerName, "DigiCert") {
-					return fmt.Errorf("`certificate_type` can only be specified when the issuer is DigiCert")
-				}
-
-				if !isValidDigiCertCertificateType(certificateType) {
-					return fmt.Errorf("`certificate_type` must be one of [%s] when the issuer is DigiCert", strings.Join(validDigiCertCertificateTypes, ", "))
-				}
+			if err := validateDigiCertCertificateType(policiesRaw); err != nil {
+				return err
 			}
 
 			return nil
@@ -560,9 +530,12 @@ func resourceKeyVaultCertificateCreate(d *pluginsdk.ResourceData, meta interface
 
 	t := d.Get("tags").(map[string]interface{})
 
-	if err := validateDigiCertCertificateTypeForCreate(d); err != nil {
-		return fmt.Errorf("validating certificate type: %s", err)
+	if policiesRaw, ok := d.Get("certificate_policy").([]interface{}); ok {
+		if err := validateDigiCertCertificateType(policiesRaw); err != nil {
+			return fmt.Errorf("validating certificate type: %s", err)
+		}
 	}
+
 	policy, err := expandKeyVaultCertificatePolicy(d)
 	if err != nil {
 		return fmt.Errorf("expanding certificate policy: %s", err)
@@ -967,9 +940,8 @@ func isValidDigiCertCertificateType(value string) bool {
 	return false
 }
 
-func validateDigiCertCertificateTypeForCreate(d *pluginsdk.ResourceData) error {
-	policiesRaw, ok := d.Get("certificate_policy").([]interface{})
-	if !ok || len(policiesRaw) == 0 || policiesRaw[0] == nil {
+func validateDigiCertCertificateType(policiesRaw []interface{}) error {
+	if len(policiesRaw) == 0 || policiesRaw[0] == nil {
 		return nil
 	}
 
