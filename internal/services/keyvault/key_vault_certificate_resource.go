@@ -426,10 +426,6 @@ func resourceKeyVaultCertificate() *pluginsdk.Resource {
 		},
 
 		CustomizeDiff: func(ctx context.Context, d *pluginsdk.ResourceDiff, i interface{}) error {
-			if d.Id() != "" {
-				return nil
-			}
-
 			policiesRaw, ok := d.Get("certificate_policy").([]interface{})
 			if !ok {
 				return nil
@@ -531,12 +527,6 @@ func resourceKeyVaultCertificateCreate(d *pluginsdk.ResourceData, meta interface
 	}
 
 	t := d.Get("tags").(map[string]interface{})
-
-	if policiesRaw, ok := d.Get("certificate_policy").([]interface{}); ok {
-		if err := validateDigiCertCertificateType(policiesRaw); err != nil {
-			return fmt.Errorf("validating certificate type: %s", err)
-		}
-	}
 
 	policy, err := expandKeyVaultCertificatePolicy(d)
 	if err != nil {
