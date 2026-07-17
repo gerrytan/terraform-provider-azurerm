@@ -912,7 +912,7 @@ resource "azurerm_subnet" "test" {
   virtual_network_name = azurerm_virtual_network.test.name
   ip_address_pool {
     id                     = azurerm_network_manager_ipam_pool.test.id
-    number_of_ip_addresses = "10"
+    number_of_ip_addresses = "32"
   }
 }
 `, data.RandomInteger, data.Locations.Primary)
@@ -967,7 +967,7 @@ resource "azurerm_subnet" "test" {
   virtual_network_name = azurerm_virtual_network.test.name
   ip_address_pool {
     id                     = azurerm_network_manager_ipam_pool.test.id
-    number_of_ip_addresses = "50"
+    number_of_ip_addresses = "128"
   }
 }
 `, data.RandomInteger, data.Locations.Primary)

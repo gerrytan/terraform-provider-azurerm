@@ -442,6 +442,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -474,6 +475,7 @@ resource "azurerm_key_vault" "import" {
   name                       = azurerm_key_vault.test.name
   location                   = azurerm_key_vault.test.location
   resource_group_name        = azurerm_key_vault.test.resource_group_name
+  rbac_authorization_enabled = false
   tenant_id                  = azurerm_key_vault.test.tenant_id
   sku_name                   = "premium"
   soft_delete_retention_days = 7
@@ -512,6 +514,7 @@ resource "azurerm_key_vault" "test" {
   name                          = "acctest%s"
   location                      = azurerm_resource_group.test.location
   resource_group_name           = azurerm_resource_group.test.name
+  rbac_authorization_enabled    = false
   tenant_id                     = data.azurerm_client_config.current.tenant_id
   sku_name                      = "standard"
   soft_delete_retention_days    = 7
@@ -589,6 +592,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -623,6 +627,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -658,6 +663,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -855,6 +861,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -904,6 +911,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -946,6 +954,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -1015,6 +1024,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   purge_protection_enabled   = "%t"
@@ -1038,11 +1048,12 @@ resource "azurerm_resource_group" "test" {
 }
 
 resource "azurerm_key_vault" "test" {
-  name                = "acctest%s"
-  location            = azurerm_resource_group.test.location
-  resource_group_name = azurerm_resource_group.test.name
-  tenant_id           = data.azurerm_client_config.current.tenant_id
-  sku_name            = "standard"
+  name                       = "acctest%s"
+  location                   = azurerm_resource_group.test.location
+  resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
+  tenant_id                  = data.azurerm_client_config.current.tenant_id
+  sku_name                   = "standard"
 }
 `, data.RandomInteger, data.Locations.Primary, data.RandomString)
 }
@@ -1089,6 +1100,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -1113,6 +1125,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "standard"
   soft_delete_retention_days = 7
@@ -1139,6 +1152,7 @@ resource "azurerm_key_vault" "test" {
   name                       = "acctest%s"
   location                   = azurerm_resource_group.test.location
   resource_group_name        = azurerm_resource_group.test.name
+  rbac_authorization_enabled = false
   tenant_id                  = data.azurerm_client_config.current.tenant_id
   sku_name                   = "premium"
   soft_delete_retention_days = 7
