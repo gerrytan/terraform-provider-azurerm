@@ -9,7 +9,6 @@ import (
 
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance/check"
-	"github.com/hashicorp/terraform-provider-azurerm/internal/features"
 )
 
 type SubnetDataSource struct{}
@@ -112,16 +111,10 @@ func TestAccDataSourceSubnet_serviceEndpoints(t *testing.T) {
 		check.That(data.ResourceName).Key("route_table_id").HasValue(""),
 	)
 
-	if !features.FivePointOh() {
-		checks = append(checks,
-			check.That(data.ResourceName).Key("service_endpoints.#").HasValue("2"),
-		)
-	} else {
-		checks = append(checks,
-			check.That(data.ResourceName).Key("service_endpoints.#").HasValue("2"),
-			check.That(data.ResourceName).Key("service_endpoints.0.service").Exists(),
-		)
-	}
+	checks = append(checks,
+		check.That(data.ResourceName).Key("service_endpoints.#").HasValue("2"),
+		check.That(data.ResourceName).Key("service_endpoints.0.service").Exists(),
+	)
 
 	data.DataSourceTest(t, []acceptance.TestStep{
 		{
@@ -143,17 +136,11 @@ func TestAccDataSourceSubnet_serviceEndpointsWithNetworkIdentifier(t *testing.T)
 		check.That(data.ResourceName).Key("address_prefix").Exists(),
 	)
 
-	if !features.FivePointOh() {
-		checks = append(checks,
-			check.That(data.ResourceName).Key("service_endpoints.#").HasValue("1"),
-		)
-	} else {
-		checks = append(checks,
-			check.That(data.ResourceName).Key("service_endpoints.#").HasValue("1"),
-			check.That(data.ResourceName).Key("service_endpoints.0.service").HasValue("Microsoft.Storage"),
-			check.That(data.ResourceName).Key("service_endpoints.0.network_identifier").IsSet(),
-		)
-	}
+	checks = append(checks,
+		check.That(data.ResourceName).Key("service_endpoints.#").HasValue("1"),
+		check.That(data.ResourceName).Key("service_endpoints.0.service").HasValue("Microsoft.Storage"),
+		check.That(data.ResourceName).Key("service_endpoints.0.network_identifier").IsSet(),
+	)
 
 	data.DataSourceTest(t, []acceptance.TestStep{
 		{
@@ -303,18 +290,6 @@ data "azurerm_subnet" "test" {
 }
 
 func (SubnetDataSource) serviceEndpoints(data acceptance.TestData) string {
-	if !features.FivePointOh() {
-		return fmt.Sprintf(`
-%s
-
-data "azurerm_subnet" "test" {
-  name                 = azurerm_subnet.test.name
-  virtual_network_name = azurerm_subnet.test.virtual_network_name
-  resource_group_name  = azurerm_subnet.test.resource_group_name
-}
-`, SubnetResource{}.serviceEndpointsUpdated(data))
-	}
-
 	return fmt.Sprintf(`
 %s
 
