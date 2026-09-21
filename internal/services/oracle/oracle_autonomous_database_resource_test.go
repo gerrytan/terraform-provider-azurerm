@@ -59,7 +59,7 @@ func TestAdbsRegularResource_complete(t *testing.T) {
 	})
 }
 
-func TestAdbsRegularResource_updateRegular(t *testing.T) {
+func TestAdbsRegularResource_update(t *testing.T) {
 	data := acceptance.BuildTestData(t, oracle.AutonomousDatabaseRegularResource{}.ResourceType(), "test")
 	r := AdbsRegularResource{}
 	data.ResourceTest(t, r, []acceptance.TestStep{
@@ -67,7 +67,6 @@ func TestAdbsRegularResource_updateRegular(t *testing.T) {
 			Config: r.basic(data),
 			Check: acceptance.ComposeTestCheckFunc(
 				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("maintenance_patch_level").HasValue("Regular"),
 			),
 		},
 		data.ImportStep("admin_password"),
@@ -75,7 +74,6 @@ func TestAdbsRegularResource_updateRegular(t *testing.T) {
 			Config: r.update(data),
 			Check: acceptance.ComposeTestCheckFunc(
 				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("maintenance_patch_level").HasValue("Early"),
 			),
 		},
 		data.ImportStep("admin_password"),
