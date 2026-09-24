@@ -90,6 +90,10 @@ Please follow the format in the example below for listing breaking changes in re
 
 * The deprecated `key_vault_id` property has been removed.
 
+### `azurerm_oracle_autonomous_database`
+
+* The deprecated `data_storage_size_in_tbs` property has been removed in favour of the `data_storage_size_in_gbs` property. Multiply the previous terabyte value by `1024` when updating your configuration.
+
 ## Breaking Changes in Data Sources
 
 Please follow the format in the example below for listing breaking changes in data sources:

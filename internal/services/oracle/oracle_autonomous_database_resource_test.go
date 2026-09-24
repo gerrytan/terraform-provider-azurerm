@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/acceptance/check"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/clients"
+	"github.com/hashicorp/terraform-provider-azurerm/internal/features"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/oracle"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 )
@@ -40,7 +41,6 @@ func TestAdbsRegularResource_basic(t *testing.T) {
 			Config: r.basic(data),
 			Check: acceptance.ComposeTestCheckFunc(
 				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("data_storage_size_in_gbs").HasValue("40"),
 			),
 		},
 		data.ImportStep("admin_password"),
@@ -111,8 +111,6 @@ func TestAdbsRegularResource_updatePublicAcces(t *testing.T) {
 			Config: r.publicAccess(data),
 			Check: acceptance.ComposeTestCheckFunc(
 				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("data_storage_size_in_gbs").HasValue("1024"),
-				check.That(data.ResourceName).Key("data_storage_size_in_tbs").HasValue("1"),
 			),
 		},
 		data.ImportStep("admin_password"),
@@ -120,8 +118,30 @@ func TestAdbsRegularResource_updatePublicAcces(t *testing.T) {
 			Config: r.publicAccessUpdate(data),
 			Check: acceptance.ComposeTestCheckFunc(
 				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("data_storage_size_in_gbs").HasValue("1024"),
-				check.That(data.ResourceName).Key("data_storage_size_in_tbs").HasValue("1"),
+			),
+		},
+		data.ImportStep("admin_password"),
+	})
+}
+
+func TestAdbsRegularResource_updateDataStorageSizeFromTbsToGbs(t *testing.T) {
+	if features.SixPointOh() {
+		t.Skip("Skipping since `data_storage_in_tbs` is deprecated and will be removed in 6.0")
+	}
+	data := acceptance.BuildTestData(t, oracle.AutonomousDatabaseRegularResource{}.ResourceType(), "test")
+	r := AdbsRegularResource{}
+	data.ResourceTest(t, r, []acceptance.TestStep{
+		{
+			Config: r.basicWithStorageSizeInTbs(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
+			),
+		},
+		data.ImportStep("admin_password"),
+		{
+			Config: r.basic(data),
+			Check: acceptance.ComposeTestCheckFunc(
+				check.That(data.ResourceName).ExistsInAzure(r),
 			),
 		},
 		data.ImportStep("admin_password"),
@@ -136,8 +156,6 @@ func TestAdbsRegularResource_publicAccess(t *testing.T) {
 			Config: r.publicAccess(data),
 			Check: acceptance.ComposeTestCheckFunc(
 				check.That(data.ResourceName).ExistsInAzure(r),
-				check.That(data.ResourceName).Key("data_storage_size_in_gbs").HasValue("1024"),
-				check.That(data.ResourceName).Key("data_storage_size_in_tbs").HasValue("1"),
 			),
 		},
 		data.ImportStep("admin_password"),
@@ -160,10 +178,6 @@ func TestAdbsRegularResource_requiresImport(t *testing.T) {
 
 func (a AdbsRegularResource) basic(data acceptance.TestData) string {
 	return fmt.Sprintf(`
-
-
-
-
 %s
 
 provider "azurerm" {
@@ -182,7 +196,39 @@ resource "azurerm_oracle_autonomous_database" "test" {
   auto_scaling_enabled             = false
   auto_scaling_for_storage_enabled = false
   mtls_connection_required         = true
-  data_storage_size_in_gbs         = 40
+  data_storage_size_in_gbs         = 1024
+  db_workload                      = "OLTP"
+  admin_password                   = "TestPass#2024#"
+  db_version                       = "19c"
+  character_set                    = "AL32UTF8"
+  national_character_set           = "AL16UTF16"
+  subnet_id                        = azurerm_subnet.test.id
+  virtual_network_id               = azurerm_virtual_network.test.id
+}
+`, a.template(data), data.RandomInteger, data.Locations.Primary)
+}
+
+func (a AdbsRegularResource) basicWithStorageSizeInTbs(data acceptance.TestData) string {
+	return fmt.Sprintf(`
+%s
+
+provider "azurerm" {
+  features {}
+}
+
+resource "azurerm_oracle_autonomous_database" "test" {
+  name                             = "OFake%[2]d"
+  display_name                     = "OFake%[2]d"
+  resource_group_name              = azurerm_resource_group.test.name
+  location                         = "%[3]s"
+  compute_model                    = "ECPU"
+  compute_count                    = 2
+  license_model                    = "LicenseIncluded"
+  backup_retention_period_in_days  = 12
+  auto_scaling_enabled             = false
+  auto_scaling_for_storage_enabled = false
+  mtls_connection_required         = true
+  data_storage_size_in_gbs         = 1
   db_workload                      = "OLTP"
   admin_password                   = "TestPass#2024#"
   db_version                       = "19c"
@@ -198,7 +244,6 @@ func (a AdbsRegularResource) complete(data acceptance.TestData) string {
 	timeOfBackup := time.Now().UTC().Add(72 * time.Hour).Format(time.RFC3339)
 
 	return fmt.Sprintf(`
-
 %s
 
 provider "azurerm" {
@@ -217,7 +262,7 @@ resource "azurerm_oracle_autonomous_database" "test" {
   auto_scaling_enabled             = false
   auto_scaling_for_storage_enabled = false
   mtls_connection_required         = false
-  data_storage_size_in_tbs         = 1
+  data_storage_size_in_gbs         = 1024
   db_workload                      = "OLTP"
   admin_password                   = "TestPass#2024#"
   db_version                       = "19c"
@@ -239,10 +284,7 @@ resource "azurerm_oracle_autonomous_database" "test" {
 
 func (a AdbsRegularResource) update(data acceptance.TestData) string {
 	timeOfBackup := time.Now().UTC().Add(72 * time.Hour).Format(time.RFC3339)
-
 	return fmt.Sprintf(`
-
-
 %s
 
 provider "azurerm" {
@@ -304,7 +346,7 @@ resource "azurerm_oracle_autonomous_database" "test" {
   auto_scaling_enabled             = false
   auto_scaling_for_storage_enabled = false
   mtls_connection_required         = false
-  data_storage_size_in_tbs         = 1
+  data_storage_size_in_gbs         = 1024
   db_workload                      = "OLTP"
   admin_password                   = "TestPass#2024#"
   db_version                       = "19c"
@@ -338,7 +380,7 @@ resource "azurerm_oracle_autonomous_database" "import" {
   auto_scaling_enabled             = azurerm_oracle_autonomous_database.test.auto_scaling_enabled
   auto_scaling_for_storage_enabled = azurerm_oracle_autonomous_database.test.auto_scaling_for_storage_enabled
   mtls_connection_required         = azurerm_oracle_autonomous_database.test.mtls_connection_required
-  data_storage_size_in_gbs         = azurerm_oracle_autonomous_database.test.data_storage_size_in_gbs
+  storage_size_in_gbs              = azurerm_oracle_autonomous_database.test.data_storage_size_in_gbs
   db_workload                      = azurerm_oracle_autonomous_database.test.db_workload
   admin_password                   = azurerm_oracle_autonomous_database.test.admin_password
   db_version                       = azurerm_oracle_autonomous_database.test.db_version
@@ -352,8 +394,6 @@ resource "azurerm_oracle_autonomous_database" "import" {
 
 func (a AdbsRegularResource) publicAccess(data acceptance.TestData) string {
 	return fmt.Sprintf(`
-
-
 %s
 
 provider "azurerm" {
@@ -387,6 +427,8 @@ func (a AdbsRegularResource) publicAccessUpdate(data acceptance.TestData) string
 	return fmt.Sprintf(`
 
 
+
+
 %s
 
 provider "azurerm" {
@@ -405,7 +447,7 @@ resource "azurerm_oracle_autonomous_database" "test" {
   auto_scaling_enabled             = false
   auto_scaling_for_storage_enabled = false
   mtls_connection_required         = true
-  data_storage_size_in_tbs         = 1
+  data_storage_size_in_gbs         = 1024
   db_workload                      = "OLTP"
   admin_password                   = "TestPass$2024$"
   db_version                       = "19c"

@@ -87,3 +87,13 @@ func flattenConnectionStrings(connStrings *autonomousdatabases.ConnectionStringT
 
 	return flattened
 }
+
+func coalesceStorageSizeToGbs(sizeInGbs, sizeInTbs *int64) int64 {
+	if sizeInGbs != nil {
+		return *sizeInGbs
+	}
+	if sizeInTbs != nil {
+		return *sizeInTbs * 1024
+	}
+	return 0
+}
