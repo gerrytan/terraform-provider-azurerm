@@ -219,6 +219,7 @@ resource "azurerm_oracle_autonomous_database" "test" {
   subnet_id                        = azurerm_subnet.test.id
   virtual_network_id               = azurerm_virtual_network.test.id
   allowed_ips                      = []
+  maintenance_patch_level          = "Regular"
   long_term_backup_schedule {
     repeat_cadence           = "Monthly"
     time_of_backup           = "%[4]s"
