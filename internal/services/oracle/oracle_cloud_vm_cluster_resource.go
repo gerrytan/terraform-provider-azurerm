@@ -1,4 +1,4 @@
-// Copyright IBM Corp. 2014, 2025
+// Copyright IBM Corp. 2014, 2026
 // SPDX-License-Identifier: MPL-2.0
 
 package oracle
@@ -294,8 +294,6 @@ func (CloudVmClusterResource) Arguments() map[string]*pluginsdk.Schema {
 		"file_system_configuration": {
 			Type:     pluginsdk.TypeList,
 			Optional: true,
-			// NOTE: O+C - the value will be different between creation and reading because the API provides an additional immutable or default elements
-			Computed: true,
 			Elem: &pluginsdk.Resource{
 				Schema: map[string]*pluginsdk.Schema{
 					"mount_point": {
