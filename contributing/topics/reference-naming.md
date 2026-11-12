@@ -24,9 +24,12 @@ Here are some general guidelines you can turn to when naming properties:
 
 > A certificate that must be base64 encoded should be named `certificate_base64`
 
-* Similarly, properties that pertain to sizes or durations/windows/occurrences should be appended with the appropriate unit of measure. However, refrain from appending unit of measure where the possible values are in [ISO8601 Duration format](https://docs.digi.com/resources/documentation/digidocs/90001488-13/reference/r_iso_8601_duration_format.htm) to avoid complex two-way integer-string mapping logic e.g.
+* Properties that pertain to sizes or durations/windows/occurrences should be appended with the appropriate unit of measure. Use plural for time duration and singular for everyting else, e.g.
 
-> `duration_in_seconds` or `size_in_gb`
+> `duration_in_seconds = 30`
+> `size_in_gb = 5`
+
+* Refrain from appending unit of measure where the possible values are in [ISO8601 Duration format](https://docs.digi.com/resources/documentation/digidocs/90001488-13/reference/r_iso_8601_duration_format.htm) to avoid complex two-way integer-string mapping logic e.g.
 
 > `duration = "12h"`
 
