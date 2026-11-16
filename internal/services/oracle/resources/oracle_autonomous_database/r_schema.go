@@ -60,10 +60,10 @@ func (Resource) Arguments() map[string]*pluginsdk.Schema {
 			ValidateFunc: validate.AdbsComputeModel,
 		},
 
-		"data_storage_size_in_gbs": {
+		"data_storage_size_in_gb": {
 			Type:         pluginsdk.TypeInt,
 			Required:     true,
-			ValidateFunc: validation.IntBetween(1, 393216),
+			ValidateFunc: validation.IntBetween(20, 393216),
 		},
 
 		"db_version": {
@@ -192,22 +192,24 @@ func (Resource) Arguments() map[string]*pluginsdk.Schema {
 	}
 
 	if !features.SixPointOh() {
-		args["data_storage_size_in_gbs"] = &pluginsdk.Schema{
+		args["data_storage_size_in_gb"] = &pluginsdk.Schema{
 			Type:     pluginsdk.TypeInt,
 			Optional: true,
-			// NOTE: O+C The API may return storage in either unit; GB is populated when deprecated TB is configured.
+			// NOTE: O+C _tbs is deprecated in favour of _gb per guide-breaking-changes.md, API accepts either as PUT payload
+			// and values will be coalesced before storing into state
 			Computed:     true,
-			ExactlyOneOf: []string{"data_storage_size_in_gbs", "data_storage_size_in_tbs"},
-			ValidateFunc: validation.IntBetween(1, 393216),
+			ExactlyOneOf: []string{"data_storage_size_in_gb", "data_storage_size_in_tbs"},
+			ValidateFunc: validation.IntBetween(20, 393216),
 		}
 		args["data_storage_size_in_tbs"] = &pluginsdk.Schema{
 			Type:     pluginsdk.TypeInt,
 			Optional: true,
-			// NOTE: O+C Preserve legacy TB state when storage is configured in GB until the next major version.
+			// NOTE: O+C _tbs is deprecated in favour of _gb per guide-breaking-changes.md, API accepts either as PUT payload
+			// and values will be coalesced before storing into state
 			Computed:     true,
-			ExactlyOneOf: []string{"data_storage_size_in_gbs", "data_storage_size_in_tbs"},
+			ExactlyOneOf: []string{"data_storage_size_in_gb", "data_storage_size_in_tbs"},
 			ValidateFunc: validation.IntBetween(1, 384),
-			Deprecated:   "`data_storage_size_in_tbs` has been deprecated in favour of `data_storage_size_in_gbs` and will be removed in v6.0 of the AzureRM Provider",
+			Deprecated:   "`data_storage_size_in_tbs` has been deprecated in favour of `data_storage_size_in_gb` and will be removed in v6.0 of the AzureRM Provider",
 		}
 	}
 

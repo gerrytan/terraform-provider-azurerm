@@ -52,7 +52,7 @@ func (Resource) Read() sdk.ResourceFunc {
 				state.ComputeCount = pointer.From(props.ComputeCount)
 				state.ComputeModel = pointer.FromEnum(props.ComputeModel)
 				state.CustomerContacts = helpers.FlattenAdbsCustomerContacts(props.CustomerContacts)
-				state.DataStorageSizeInGbs = coalesceStorageSizeToGbs(props.DataStorageSizeInGbs, props.DataStorageSizeInTbs)
+				state.DataStorageSizeInGb = coalesceStorageSizeToGbs(props.DataStorageSizeInGbs, props.DataStorageSizeInTbs)
 				if !features.SixPointOh() {
 					state.DataStorageSizeInTbs = pointer.From(props.DataStorageSizeInTbs)
 					if props.DataStorageSizeInTbs == nil && props.DataStorageSizeInGbs != nil && *props.DataStorageSizeInGbs%1024 == 0 {
@@ -83,7 +83,7 @@ func (r Resource) hasGeneralUpdates(metadata sdk.ResourceMetaData) bool {
 	// lintignore:R019 // deliberate subset: only the fields covered by the general update payload; the remaining attributes are updated via separate calls
 	keys := []string{
 		"tags",
-		"data_storage_size_in_gbs",
+		"data_storage_size_in_gb",
 		"compute_count",
 		"auto_scaling_enabled",
 		"auto_scaling_for_storage_enabled",

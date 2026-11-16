@@ -66,7 +66,7 @@ func (r Resource) Create() sdk.ResourceFunc {
 			if !features.SixPointOh() && !pluginsdk.IsExplicitlyNullInConfig(metadata.ResourceData, "data_storage_size_in_tbs") {
 				properties.DataStorageSizeInTbs = pointer.To(model.DataStorageSizeInTbs)
 			} else {
-				properties.DataStorageSizeInGbs = pointer.To(model.DataStorageSizeInGbs)
+				properties.DataStorageSizeInGbs = pointer.To(model.DataStorageSizeInGb)
 			}
 
 			if len(model.CustomerContacts) > 0 {

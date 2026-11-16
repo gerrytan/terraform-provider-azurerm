@@ -19,7 +19,7 @@ type AutonomousDatabaseRegularResourceModel struct {
 	CharacterSet                 string                                  `tfschema:"character_set"`
 	ComputeCount                 float64                                 `tfschema:"compute_count"`
 	ComputeModel                 string                                  `tfschema:"compute_model"`
-	DataStorageSizeInGbs         int64                                   `tfschema:"data_storage_size_in_gbs"`
+	DataStorageSizeInGb          int64                                   `tfschema:"data_storage_size_in_gb"`
 	DataStorageSizeInTbs         int64                                   `tfschema:"data_storage_size_in_tbs,removedInNextMajorVersion"`
 	DbVersion                    string                                  `tfschema:"db_version"`
 	DbWorkload                   string                                  `tfschema:"db_workload"`

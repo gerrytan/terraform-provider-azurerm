@@ -55,8 +55,8 @@ func (r Resource) Update() sdk.ResourceFunc {
 					if metadata.ResourceData.HasChange("data_storage_size_in_tbs") {
 						generalUpdate.Properties.DataStorageSizeInTbs = pointer.To(model.DataStorageSizeInTbs)
 					}
-				} else if metadata.ResourceData.HasChange("data_storage_size_in_gbs") {
-					generalUpdate.Properties.DataStorageSizeInGbs = pointer.To(model.DataStorageSizeInGbs)
+				} else if metadata.ResourceData.HasChange("data_storage_size_in_gb") {
+					generalUpdate.Properties.DataStorageSizeInGbs = pointer.To(model.DataStorageSizeInGb)
 				}
 				if metadata.ResourceData.HasChange("compute_count") {
 					generalUpdate.Properties.ComputeCount = pointer.To(model.ComputeCount)
