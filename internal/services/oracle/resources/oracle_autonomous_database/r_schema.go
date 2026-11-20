@@ -4,9 +4,14 @@
 package oracle_autonomous_database
 
 import (
+	"context"
+	"fmt"
+	"time"
+
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonids"
 	"github.com/hashicorp/go-azure-helpers/resourcemanager/commonschema"
 	"github.com/hashicorp/go-azure-sdk/resource-manager/oracledatabase/2025-09-01/autonomousdatabases"
+	"github.com/hashicorp/terraform-provider-azurerm/internal/sdk"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/services/oracle/validate"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/validation"
@@ -198,6 +203,41 @@ func (Resource) Attributes() map[string]*pluginsdk.Schema {
 		"ocid": {
 			Type:     pluginsdk.TypeString,
 			Computed: true,
+		},
+	}
+}
+
+func (Resource) CustomizeDiff() sdk.ResourceFunc {
+	return sdk.ResourceFunc{
+		Timeout: 30 * time.Second,
+		Func: func(ctx context.Context, metadata sdk.ResourceMetaData) error {
+			if metadata.ResourceDiff == nil {
+				return nil
+			}
+
+			var model AutonomousDatabaseRegularResourceModel
+			if err := metadata.DecodeDiff(&model); err != nil {
+				return fmt.Errorf("decoding: %+v", err)
+			}
+
+			if model.DbWorkload != string(autonomousdatabases.WorkloadTypeAJD) {
+				return nil
+			}
+
+			return pluginsdk.CustomDiffWithAll(
+				func(ctx context.Context, d *pluginsdk.ResourceDiff, meta any) error {
+					if model.CharacterSet != "" && model.CharacterSet != "AL32UTF8" {
+						return fmt.Errorf("`character_set` must be `AL32UTF8` when `db_workload` is `AJD`")
+					}
+					return nil
+				},
+				func(ctx context.Context, d *pluginsdk.ResourceDiff, meta any) error {
+					if model.NationalCharacterSet != "" && model.NationalCharacterSet != "AL16UTF16" {
+						return fmt.Errorf("`national_character_set` must be `AL16UTF16` when `db_workload` is `AJD`")
+					}
+					return nil
+				},
+			)(ctx, metadata.ResourceDiff, metadata.Client)
 		},
 	}
 }
