@@ -11,50 +11,40 @@ import (
 	"github.com/hashicorp/terraform-provider-azurerm/internal/tf/pluginsdk"
 )
 
-func NodePoolAzureContainerLinuxCustomizeDiff(nodePoolPath string) pluginsdk.CustomizeDiffFunc {
-	prefix := ""
-	if nodePoolPath != "" {
-		prefix = nodePoolPath + ".0."
-	}
-	osSKUPath := prefix + "os_sku"
-	securityPath := prefix + "security.0."
-
+func NodePoolAzureContainerLinuxCustomizeDiff(pathPrefix string) pluginsdk.CustomizeDiffFunc {
 	return func(ctx context.Context, d *pluginsdk.ResourceDiff, meta any) error {
-		osSKU, ok := d.GetOkExists(osSKUPath)
-		if !ok || osSKU.(string) != string(agentpools.OSSKUAzureContainerLinux) {
+		osSKU := ""
+		secureBootEnabled, vtpmEnabled := false, false
+
+		if val, ok := d.GetOkExists(pathPrefix + "os_sku"); ok {
+			osSKU = val.(string)
+		} else {
 			return nil
 		}
 
-		if _, ok := d.GetOkExists(prefix + "security.#"); !ok {
-			config := d.GetRawConfig()
-			if !config.IsKnown() || config.IsNull() {
-				return nil
-			}
-			if nodePoolPath != "" {
-				nodePools := config.GetAttr(nodePoolPath)
-				if !nodePools.IsKnown() || nodePools.IsNull() || nodePools.LengthInt() == 0 {
-					return nil
-				}
-				config = nodePools.AsValueSlice()[0]
-				if !config.IsKnown() || config.IsNull() {
-					return nil
-				}
-			}
-
-			security := config.GetAttr("security")
-			if security.IsKnown() && (security.IsNull() || security.LengthInt() == 0) {
-				return fmt.Errorf("`%ssecure_boot_enabled` must be set to `true` when `%s` is `AzureContainerLinux`", securityPath, osSKUPath)
-			}
+		if osSKU != string(agentpools.OSSKUAzureContainerLinux) {
 			return nil
 		}
 
-		for _, flag := range []string{"secure_boot_enabled", "vtpm_enabled"} {
-			path := securityPath + flag
-			value, ok := d.GetOkExists(path)
-			if ok && !value.(bool) {
-				return fmt.Errorf("`%s` must be set to `true` when `%s` is `AzureContainerLinux`", path, osSKUPath)
-			}
+		if val, ok := d.GetOkExists(pathPrefix + "security.0.secure_boot_enabled"); ok {
+			secureBootEnabled = val.(bool)
+		} else {
+			return nil
 		}
+
+		if val, ok := d.GetOkExists(pathPrefix + "security.0.vtpm_enabled"); ok {
+			vtpmEnabled = val.(bool)
+		} else {
+			return nil
+		}
+
+		if !secureBootEnabled {
+			return fmt.Errorf("`%[1]ssecurity.0.secure_boot_enabled` must be set to `true` when `%[1]s` is `AzureContainerLinux`", pathPrefix)
+		}
+		if !vtpmEnabled {
+			return fmt.Errorf("`%[1]ssecurity.0.vtpm_enabled` must be set to `true` when `%[1]s` is `AzureContainerLinux`", pathPrefix)
+		}
+
 		return nil
 	}
 }
